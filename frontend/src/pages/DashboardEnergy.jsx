@@ -13,24 +13,63 @@ import EnergyGraph from '../components/EnergyGraph';
 import AlertPanel from '../components/EnergyAlertPanel';
 
 // Mock data (will be replaced with real API calls)
-const mockBuildings = ['Block A', 'Block B', 'Library', 'Lab Complex'];
+const mockBuildings = [
+  { id: 1, name: 'Block A', status: 'normal', currentUsage: 45.2, dailyUsage: 1024, deviceCount: 28 },
+  { id: 2, name: 'Block B', status: 'warning', currentUsage: 68.7, dailyUsage: 1450, deviceCount: 32 },
+  { id: 3, name: 'Library', status: 'normal', currentUsage: 38.5, dailyUsage: 920, deviceCount: 18 },
+  { id: 4, name: 'Lab Complex', status: 'critical', currentUsage: 82.3, dailyUsage: 1980, deviceCount: 45 },
+];
+
 const mockAlerts = [
   { id: 1, type: 'warning', message: 'High energy consumption in Block A', time: '2 min ago' },
   { id: 2, type: 'critical', message: 'Power surge detected in Lab Complex', time: '5 min ago' },
   { id: 3, type: 'warning', message: 'Voltage fluctuation in Block B', time: '15 min ago' },
 ];
 
+// Generate mock energy data for the graph
+const generateEnergyData = () => {
+  const data = [];
+  const now = new Date();
+  
+  // Generate data for last 24 hours
+  for (let i = 23; i >= 0; i--) {
+    const time = new Date(now);
+    time.setHours(now.getHours() - i);
+    
+    const hourData = {
+      timestamp: time.toLocaleTimeString([], { hour: '2-digit', hour12: false }),
+    };
+    
+    // Generate random but realistic energy data for each building
+    mockBuildings.forEach(building => {
+      // Base value with some randomness
+      const baseValue = building.currentUsage * (0.8 + Math.random() * 0.4);
+      // Add some time-based variation
+      const hour = time.getHours();
+      const timeFactor = 0.5 + Math.sin((hour - 6) * Math.PI / 12) * 0.5;
+      hourData[building.name] = Math.round((baseValue * timeFactor) * 10) / 10;
+    });
+    
+    data.push(hourData);
+  }
+  
+  return data;
+};
+
 const DashboardEnergy = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [buildings, setBuildings] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [energyData, setEnergyData] = useState([]);
   const [selectedBuilding, setSelectedBuilding] = useState(null);
+  const [timeRange, setTimeRange] = useState('24h');
 
   // Simulate loading data
   useEffect(() => {
     const timer = setTimeout(() => {
       setBuildings(mockBuildings);
       setAlerts(mockAlerts);
+      setEnergyData(generateEnergyData());
       setIsLoading(false);
     }, 1000);
 
@@ -138,9 +177,35 @@ const DashboardEnergy = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Energy Graph */}
           <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Energy Consumption (Last 24 Hours)</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Energy Consumption (Last 24 Hours)</h3>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setTimeRange('24h')}
+                  className={`px-3 py-1 text-sm rounded-md ${timeRange === '24h' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+                >
+                  24h
+                </button>
+                <button
+                  onClick={() => setTimeRange('7d')}
+                  className={`px-3 py-1 text-sm rounded-md ${timeRange === '7d' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+                >
+                  7d
+                </button>
+                <button
+                  onClick={() => setTimeRange('30d')}
+                  className={`px-3 py-1 text-sm rounded-md ${timeRange === '30d' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+                >
+                  30d
+                </button>
+              </div>
+            </div>
             <div className="h-80">
-              <EnergyGraph />
+              <EnergyGraph 
+                data={energyData} 
+                buildings={mockBuildings}
+                timeRange={timeRange}
+              />
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Pages
 import DashboardEnergy from './pages/DashboardEnergy';
@@ -54,12 +55,14 @@ function App() {
         {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
           <div className="mx-auto max-w-7xl">
-            <Routes>
-              <Route path="/" element={<DashboardEnergy />} />
-              <Route path="/maintenance" element={<Maintenance />} />
-              <Route path="/devices" element={<Devices />} />
-              <Route path="/settings" element={<Settings />} />
-            </Routes>
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<DashboardEnergy />} />
+                <Route path="/maintenance" element={<Maintenance />} />
+                <Route path="/devices" element={<Devices />} />
+                <Route path="/settings" element={<Settings />} />
+              </Routes>
+            </ErrorBoundary>
           </div>
         </main>
       </div>

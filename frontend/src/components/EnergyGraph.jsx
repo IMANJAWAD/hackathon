@@ -1,7 +1,7 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const EnergyGraph = ({ data, buildings, timeRange }) => {
+const EnergyGraph = ({ data = [], buildings = [], timeRange = '24h' }) => {
   return (
     <div className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -31,7 +31,7 @@ const EnergyGraph = ({ data, buildings, timeRange }) => {
             formatter={(value, name) => [`${value} kWh`, name]}
           />
           <Legend />
-          {buildings.map((building, index) => (
+          {(buildings || []).map((building, index) => (
             <Line
               key={building.id}
               type="monotone"

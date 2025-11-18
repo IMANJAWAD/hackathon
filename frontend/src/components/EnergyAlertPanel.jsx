@@ -15,7 +15,8 @@ const EnergyAlertPanel = ({ alerts = [] }) => {
   }
 
   const getAlertColor = (severity) => {
-    switch (severity.toLowerCase()) {
+    const severityLower = (severity || '').toLowerCase();
+    switch (severityLower) {
       case 'high':
         return 'bg-red-50 border-l-4 border-red-500';
       case 'medium':
@@ -26,7 +27,8 @@ const EnergyAlertPanel = ({ alerts = [] }) => {
   };
 
   const getAlertIcon = (severity) => {
-    switch (severity.toLowerCase()) {
+    const severityLower = (severity || '').toLowerCase();
+    switch (severityLower) {
       case 'high':
         return (
           <div className="flex-shrink-0">

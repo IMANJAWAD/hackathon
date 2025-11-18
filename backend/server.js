@@ -3,7 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
-const mongoose = require('mongoose');
+
+// mongoose will be mocked later in the file
 
 // Import routes
 const energyRoutes = require('./routes/energyRoutes');
@@ -47,38 +48,37 @@ app.use((req, res, next) => {
 // Database connection - Using in-memory data for demo
 console.log('🔄 Using in-memory data for demo purposes');
 
-// Mock mongoose models for compatibility
-const mongoose = {
-  model: () => ({
+// Mock mongoose for in-memory data storage
+const mongoose = require('mongoose');
+
+// Override mongoose methods for in-memory usage
+const originalModel = mongoose.model;
+mongoose.model = function(modelName, schema) {
+  return {
     find: async () => [],
     findById: async () => ({}),
     findByIdAndUpdate: async () => ({}),
     findByIdAndDelete: async () => ({}),
     create: async (data) => ({ ...data, _id: 'mock-id', save: async () => ({ ...data, _id: 'mock-id' }) }),
-  }),
-  Schema: () => ({
-    index: () => {},
-  }),
-  Types: {
-    ObjectId: () => 'mock-id'
-  },
-  connection: {
-    on: (event, callback) => {
-      if (event === 'connected') {
-        // Simulate successful connection after a short delay
-        setTimeout(() => {
-          console.log('✅ Connected to in-memory data store');
-          if (callback) callback();
-        }, 100);
-      } else if (event === 'error') {
-        // Ignore errors for demo
-        console.log('⚠️  In-memory store: No errors to report');
-      }
+  };
+};
+
+// Mock connection events
+mongoose.connection = {
+  on: (event, callback) => {
+    if (event === 'connected' || event === 'open') {
+      // Simulate successful connection after a short delay
+      setTimeout(() => {
+        console.log('✅ Connected to in-memory data store');
+        if (callback) callback();
+      }, 100);
+    } else if (event === 'error') {
+      // Ignore errors for demo
+      console.log('⚠️  In-memory store: No errors to report');
     }
   }
 };
 
-// Mock connection for compatibility
 console.log('✅ Database connection configured for demo mode');
 
 // Health check endpoint
